@@ -64,7 +64,7 @@ def perceptron(speed_of_learning, deadline, iterations):
     weights = [0.001, -0.004]
     outputs = [0, 0, 0, 1]
     start_time = timeit.default_timer()
-
+    counter = 0
     for _ in range(iterations):
         total_error = 0
 
@@ -76,10 +76,10 @@ def perceptron(speed_of_learning, deadline, iterations):
             for j in range(n):
                 delta = speed_of_learning * data[i][j] * err
                 weights[j] += delta
-
+        counter += 1
         if total_error == 0 or timeit.default_timer() - start_time > deadline:
             break
-    return weights[0], weights[1]
+    return weights[0], weights[1], counter
 
 
 def roots_genetic_get(a, b, c, d, y):
@@ -163,8 +163,8 @@ class Container(TabbedPanel):
         except:
             speed_of_learning, deadline, number_of_iterations = 0.001, 5, 10000
 
-        first, second = perceptron(speed_of_learning, deadline, number_of_iterations)
-        self.w1.text, self.w2.text = str(first), str(second)
+        first, second, iters_used = perceptron(speed_of_learning, deadline, number_of_iterations)
+        self.w1.text, self.w2.text, self.used_ires_num.text = str(first), str(second), str(iters_used)
 
     def third_calculate(self):
 

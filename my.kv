@@ -16,6 +16,7 @@
 	number_of_iterations: number_of_iterations
 	w1: w1
 	w2: w2
+	used_ires_num: used_ires_num
 	a_value: a_value
 	b_value: b_value
 	c_value: c_value
@@ -80,7 +81,7 @@
     TabbedPanelItem:
         text: 'Lab 3.2'
         GridLayout:
-            rows: 7
+            rows: 8
             BoxLayout:
 		        padding: [20, 0, 0, 0]
 		        ItemLabel:
@@ -148,6 +149,15 @@
                     text: 'w2: '
                 Label:
                     id: w2
+                    font_size: '20sp'
+                    text: ''
+                    size_hint: 0.5, 1
+            BoxLayout:
+                padding: [10, 0, 0, 0]
+                ItemLabel:
+                    text: 'Iterations passed: '
+                Label:
+                    id: used_ires_num
                     font_size: '20sp'
                     text: ''
                     size_hint: 0.5, 1
