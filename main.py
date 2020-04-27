@@ -3,6 +3,7 @@ from kivy.config import Config
 from kivy.uix.tabbedpanel import TabbedPanel
 import timeit
 import random
+import math
 
 Config.set('kivy', 'keyboard_mode', 'systemanddock')
 
@@ -82,60 +83,51 @@ def perceptron(speed_of_learning, deadline, iterations):
     return weights[0], weights[1], counter
 
 
-def roots_genetic_get(a, b, c, d, y):
+def roots_genetic_get(a, b, c, d, y, mutate_chance=0.1):
     num_pop = 4
     population = [[random.randint(0, int(y / 4)) for i in range(4)] for j in range(num_pop)]
-
-    def root(nums: list):
-        return nums[0] * a + nums[1] * b + nums[2] * c + nums[3] * d
-
-    def random_parents():
-        temp = random.uniform(0, 1)
-        if temp < chances[0]:
-            param1 = population[0]
-        elif temp < chances[0] + chances[1]:
-            param1 = population[1]
-        elif temp < chances[0] + chances[1] + chances[2]:
-            param1 = population[2]
-        else:
-            param1 = population[3]
-        param2 = param1
-        while param2 == param1:
-            temp2 = random.uniform(0, 1)
-            if temp2 < chances[0]:
-                param2 = population[0]
-            elif temp2 < chances[0] + chances[1]:
-                param2 = population[1]
-            elif temp2 < chances[0] + chances[1] + chances[2]:
-                param2 = population[2]
-            else:
-                param2 = population[3]
-        return param1, param2
-
-    roots = [root(i) for i in population]
-
-    while roots[0] != y and roots[1] != y and roots[2] != y and roots[3] != y:
+    chance = mutate_chance
+    counter = 0
+    roots = [i[0] * a + i[1] * b + i[2] * c + i[3] * d for i in population]
+    while y not in roots:
         deltas = [1 / abs(i - y) for i in roots]
         chances = [i / sum(deltas) for i in deltas]
 
         for i in range(int(num_pop / 2)):
-            parents = random_parents()
+            temp = random.uniform(0, 1)
+            if temp < chances[0]:
+                param1 = population[0]
+            elif temp < chances[0] + chances[1]:
+                param1 = population[1]
+            elif temp < chances[0] + chances[1] + chances[2]:
+                param1 = population[2]
+            else:
+                param1 = population[3]
+            param2 = param1
+            while param2 == param1:
+                temp2 = random.uniform(0, 1)
+                if temp2 < chances[0]:
+                    param2 = population[0]
+                elif temp2 < chances[0] + chances[1]:
+                    param2 = population[1]
+                elif temp2 < chances[0] + chances[1] + chances[2]:
+                    param2 = population[2]
+                else:
+                    param2 = population[3]
             gene = random.randint(0, 3)
-            parents[0][gene], parents[1][gene] = parents[1][gene], parents[0][gene]
-            population[2 * i], population[2 * i + 1] = parents[0], parents[1]
-        population[random.randint(0, 3)][random.randint(0, 3)] += random.choice([-1, 1])
-        roots = [root(i) for i in population]
-
-
-    if roots[0] == y:
-        return population[0]
-    elif roots[1] == y:
-        return population[1]
-    elif roots[2] == y:
-        return population[2]
-    else:
-        return population[3]
-
+            param1[gene], param2[gene] = param2[gene], param1[gene]
+            for j in range(4):
+                temp = random.uniform(0, 1)
+                if temp < chance:
+                    param1[j] += random.choice([-1, 1])
+                temp = random.uniform(0, 1)
+                if temp < chance:
+                    param2[j] += random.choice([-1, 1])
+            population[2 * i] = param1
+            population[2 * i + 1] = param2
+        roots = [j[0] * a + j[1] * b + j[2] * c + j[3] * d for j in population]
+        counter += 1
+    return population[roots.index(y)], counter
 
 class Container(TabbedPanel):
 
@@ -176,9 +168,20 @@ class Container(TabbedPanel):
         except:
             a_value, b_value, c_value, d_value, y_value = 1, 2, 3, 4, 16
 
-        roots = roots_genetic_get(a_value, b_value, c_value, d_value, y_value)
+        roots = roots_genetic_get(a_value, b_value, c_value, d_value, y_value)[0]
         self.roots.text = str(roots)
 
+        iterations = []
+        experiments = 10
+        mutate_chances = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+        for i in mutate_chances:
+            steps = 0
+            for j in range(experiments):
+                steps += roots_genetic_get(a_value, b_value, c_value, d_value, y_value, i)[1]
+            iterations.append(math.ceil(steps / experiments))
+        ind = iterations.index(min(iterations))
+        best_chance = mutate_chances[ind]
+        self.mutate_chance.text = str(best_chance)
 
 class MyApp(App):
 
